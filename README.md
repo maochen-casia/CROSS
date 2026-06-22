@@ -1,4 +1,4 @@
-# CROSS
+# More Than Where You Are: Learning Semantics, Structure, and Geometry from Cross-View Consistency
 
 <p align="center">
   <img src="figures/CROSS.png" alt="CROSS overview" width="90%">
