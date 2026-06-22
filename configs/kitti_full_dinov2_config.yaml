@@ -1,0 +1,45 @@
+exp_name: kitti_full_dinov2
+pretrain_checkpoint: vigor_same_full_dinov2
+seed: 42
+data:
+  dataset: KITTI
+  data_keys: [train, val, test]
+  batch_size: 8
+  left_image_size: 1024
+  sat_image_size: &sat_image_size 640
+  aug: True
+  max_train_init_offset: 20
+  max_train_init_yaw_deg: 180
+  max_test_init_offset: 20
+  max_test_init_yaw_deg: 180
+  max_aug_offset: 20
+  max_aug_rotate: 180
+  supervise: &supervise full
+model:
+  name: CROSS
+  dino_model_name: dinov2_vitl14
+  num_nodes_per_scale: 64
+  hid_dim: 64
+  embed_dim: 8
+  depth_num_bins: 64
+  depth_min_m: &depth_min_m 1.0
+  depth_max_m: &depth_max_m 100.0
+  train_xy_search_steps: 17
+  train_yaw_search_steps: 17
+  eval_xy_search_steps: 17
+  eval_yaw_search_steps: 17
+  supervise: *supervise
+  device: cuda:0
+trainer:
+  num_epochs: 10
+  optimizer: AdamW
+  lr: 1e-4
+  weight_decay: 0.01
+  betas: [0.9, 0.999]
+  eps: 1e-8
+  num_warmup_steps: 500
+  mixed_precision: false
+  grad_clip_max_norm: 1.0
+evaluator:
+  metrics: [distance_mean, distance_median, yaw_mean_deg, yaw_median_deg]
+  loss_metric: distance_median
