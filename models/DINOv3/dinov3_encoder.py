@@ -1,12 +1,10 @@
 import os, sys
 
 code_dir = os.path.dirname(os.path.realpath(__file__))
-REPO_DIR = 'your/path/to/DINOv3/repo'
-if REPO_DIR not in sys.path:
-    sys.path.append(REPO_DIR)
+REPO_DIR = os.environ.get("DINOV3_REPO")
 
 weight_paths = {
-    'dinov3_vitl16': 'your/path/to/DINOv3/pretrained/weight/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth'
+    'dinov3_vitl16': os.environ.get("DINOV3_VITL16_WEIGHTS"),
 }
 
 import torch
@@ -25,6 +23,12 @@ class DINOv3(nn.Module):
 
         assert model_name in weight_paths.keys(), f"Model name {model_name} not recognized. Available models: {list(weight_paths.keys())}"
         weight_path = weight_paths[model_name]
+        if not REPO_DIR:
+            raise EnvironmentError("Set DINOV3_REPO to the local DINOv3 repository path.")
+        if not weight_path:
+            raise EnvironmentError(f"Set DINOV3_VITL16_WEIGHTS to the pretrained weight path for {model_name}.")
+        if REPO_DIR not in sys.path:
+            sys.path.append(REPO_DIR)
         self.pretrained = torch.hub.load(REPO_DIR, model_name, source='local', weights=weight_path)
         self.pretrained.eval()
 

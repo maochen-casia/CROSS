@@ -1,3 +1,5 @@
+import os
+
 from .trainer import Trainer
 from .evaluator import Evaluator
 from .checkpoint import Checkpoint
@@ -50,8 +52,11 @@ def build_data_loaders(config, seed):
     max_test_init_offset = data_cfg.max_test_init_offset
     max_test_init_yaw_deg = data_cfg.max_test_init_yaw_deg
 
+    data_root = data_cfg.get('root', None) or os.environ.get('CROSS_DATA_ROOT')
+    if not data_root:
+        raise ValueError("Set data.root in the config or CROSS_DATA_ROOT to the directory containing KITTI/ and VIGOR/.")
 
-    data_dict = read_data(data_dir='your/path/to/data/directory/which/stores/VIGOR/and/KITTI/',
+    data_dict = read_data(data_dir=data_root,
                           dataset_name=dataset_name, keys=data_cfg.data_keys, split_type=split_type)
 
     num_workers = 16
