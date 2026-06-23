@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>CROSS</strong> learns cross-view localization by combining semantic cues, scene structure, and geometry consistency.
+  <strong>CROSS</strong> learns stable semantics, reliable structure, and transferable geometry from cross-view consistency.
 </p>
 
 ## ✨ Overview
