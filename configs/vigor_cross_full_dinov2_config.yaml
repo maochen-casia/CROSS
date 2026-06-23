@@ -29,9 +29,9 @@ model:
   eval_xy_search_steps: 17
   eval_yaw_search_steps: 17
   supervise: *supervise
-  device: cuda:0
+  device: cuda:2
 trainer:
-  num_epochs: 10
+  num_epochs: 20
   optimizer: AdamW
   lr: 1e-4
   weight_decay: 0.01

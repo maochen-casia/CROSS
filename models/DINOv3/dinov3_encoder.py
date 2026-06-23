@@ -1,10 +1,10 @@
 import os, sys
 
 code_dir = os.path.dirname(os.path.realpath(__file__))
-REPO_DIR = os.environ.get("DINOV3_REPO")
+REPO_DIR = 'your/dinov3/repo/path'
 
 weight_paths = {
-    'dinov3_vitl16': os.environ.get("DINOV3_VITL16_WEIGHTS"),
+    'dinov3_vitl16': 'your/local/path/to/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth',
 }
 
 import torch

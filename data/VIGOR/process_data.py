@@ -141,17 +141,17 @@ def _split_train_val(train_records: List[Dict], val_ratio: float, seed: int) -> 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build VIGOR train/val/test metadata for WARG.")
-    parser.add_argument("--vigor_root", type=str, required=True, help="Path to the VIGOR root directory.")
     parser.add_argument("--val_ratio", type=float, default=0.2, help="If > 0, sample val from train set.")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
     
+    vigor_root = 'your/local/path/to/VIGOR'
 
     random.seed(args.seed)
 
-    vigor_root = Path(args.vigor_root)
-    split_root = Path(args.vigor_root) / "splits__corrected"
-    output_root = Path(args.vigor_root)
+    vigor_root = Path(vigor_root)
+    split_root = "./splits__corrected"
+    output_root = Path(vigor_root)
     output_root.mkdir(parents=True, exist_ok=True)
 
     split_type_to_dir = {

@@ -33,7 +33,7 @@ def main():
                                                          need_logger=False)
         model.load_state_dict(pretrain_checkpoint.best_val_param)
 
-    trainer, val_evaluator, test_evaluators = build_trainer_evaluator(config, model, data_loaders)
+    trainer, val_evaluator, test_evaluator = build_trainer_evaluator(config, model, data_loaders)
     checkpoint.set_trainer(trainer)
 
     num_epochs = trainer.num_epochs
@@ -54,9 +54,8 @@ def main():
 
     # test with best val model
     model.load_state_dict(checkpoint.best_val_param)
-    for key, test_evaluator in test_evaluators.items():
-        test_metrics, test_info = test_evaluator.evaluate()
-        logger.info(f'{key} ' + test_info)
+    test_metrics, test_info = test_evaluator.evaluate()
+    logger.info('Test ' + test_info)
 
 if __name__ == '__main__':
     main()

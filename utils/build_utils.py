@@ -23,16 +23,13 @@ def build_trainer_evaluator(config, model, data_loaders):
                               model,
                               data_loaders['val'])
 
-    test_evaluators = {}
-    for key in data_loaders.keys():
-        if key != 'train' and key != 'val':
-            test_evaluators[key] = Evaluator(config.evaluator,
-                                        model,
-                                        data_loaders[key])
+    test_evaluator = Evaluator(config.evaluator,
+                               model,
+                               data_loaders['test'])
     
     print('Trainer and evaluators built successfully.')
 
-    return trainer, val_evaluator, test_evaluators
+    return trainer, val_evaluator, test_evaluator
 
 def build_data_loaders(config, seed):
 
@@ -52,9 +49,7 @@ def build_data_loaders(config, seed):
     max_test_init_offset = data_cfg.max_test_init_offset
     max_test_init_yaw_deg = data_cfg.max_test_init_yaw_deg
 
-    data_root = data_cfg.get('root', None) or os.environ.get('CROSS_DATA_ROOT')
-    if not data_root:
-        raise ValueError("Set data.root in the config or CROSS_DATA_ROOT to the directory containing KITTI/ and VIGOR/.")
+    data_root = 'your/local/path/to/data/root/which/contains/KITTI/and/VIGOR'
 
     data_dict = read_data(data_dir=data_root,
                           dataset_name=dataset_name, keys=data_cfg.data_keys, split_type=split_type)

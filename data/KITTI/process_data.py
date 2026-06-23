@@ -235,14 +235,13 @@ def build_split(kitti_root: Path, rel_files: List[str]) -> List[Dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build KITTI train/val/test metadata for WARG.")
-    parser.add_argument("--kitti_root", type=str, required=True, help="Path to the KITTI root directory.")
     parser.add_argument("--train_split", type=str, default="train_files.txt")
     parser.add_argument("--val_split", type=str, default="test1_files.txt")
     parser.add_argument("--test_split", type=str, default="test2_files.txt")
     args = parser.parse_args()
 
-    kitti_root = Path(args.kitti_root)
-    output_dir = Path(args.kitti_root)
+    kitti_root = 'your/local/path/to/KITTI'
+    output_dir = Path(kitti_root)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     split_to_file = {

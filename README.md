@@ -4,154 +4,174 @@
   <img src="figures/CROSS.png" alt="CROSS overview" width="90%">
 </p>
 
-## Setup
+<p align="center">
+  <strong>CROSS</strong> learns cross-view localization by combining semantic cues, scene structure, and geometry consistency.
+</p>
 
-Install the project dependencies used by this repository, then install the external repositories used for image encoders and monocular depth:
+## ✨ Overview
 
-- [DINOv2](https://github.com/facebookresearch/dinov2)
-- DINOv3
-- [Depth-Anything-3](https://github.com/DepthAnything/Depth-Anything-3)
-- DAP
+This repository contains the training and evaluation code for CROSS on two cross-view localization benchmarks:
 
-Download the corresponding pretrained weights for DINOv2, DINOv3, Depth-Anything-3, and DAP.
+- **KITTI**: ground-view perspective images paired with satellite maps.
+- **VIGOR**: ground-view panoramas paired with satellite maps.
 
-Set the local paths before training:
+CROSS uses DINO features as visual backbones and monocular depth maps as geometric guidance.
+
+## 🛠️ Environment
+
+The code has been tested with:
+
+- Python 3.11.15
+- PyTorch 2.6.0
+- CUDA 12.4
+
+Install the minimal Python dependencies:
 
 ```bash
-export CROSS_DATA_ROOT=<data-root>
-export DINOV2_REPO=<DINOv2-repo>
-export DINOV2_VITL14_WEIGHTS=<dinov2_vitl14_pretrain.pth>
-export DINOV3_REPO=<DINOv3-repo>
-export DINOV3_VITL16_WEIGHTS=<dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth>
+pip install -r requirements.txt
 ```
 
-`CROSS_DATA_ROOT` must contain the processed dataset folders:
+You also need to clone the external repositories used by the project and download their pretrained weights:
+
+- [DINOv2](https://github.com/facebookresearch/dinov2), ViT-L/14 weights
+- [DINOv3](https://github.com/facebookresearch/dinov3), ViT-L/16 weights
+- [Depth-Anything-3](https://github.com/ByteDance-Seed/Depth-Anything-3), for KITTI monocular depth
+- [DAP](https://github.com/Insta360-Research-Team/DAP), for VIGOR monocular depth
+
+## 📁 Data Layout
+
+Prepare KITTI and VIGOR under a shared data root:
 
 ```text
-$CROSS_DATA_ROOT/
+<data-root>/
   KITTI/
+    raw_data/
+    satmap/
   VIGOR/
+    NewYork/
+    Seattle/
+    SanFrancisco/
+    Chicago/
+    splits__corrected/
 ```
 
-You can also set `data.root` directly in a config file instead of using `CROSS_DATA_ROOT`.
+Download KITTI raw data and satellite images following [HighlyAccurate](https://github.com/YujiaoShi/HighlyAccurate).
 
-## Data Processing
+Download VIGOR following the [official VIGOR instructions](https://github.com/Jeff-Zilence/VIGOR/blob/main/data/DATASET.md).
+
+## 🔧 Path Setup
+
+Before processing data or training, revise the local paths in these files:
+
+| File | What to set |
+| --- | --- |
+| `models/DINOv2/dinov2_encoder.py` | DINOv2 repository path and ViT-L/14 weight path |
+| `models/DINOv3/dinov3_encoder.py` | DINOv3 repository path and ViT-L/16 weight path |
+| `utils/build_utils.py` | data root containing `KITTI/` and `VIGOR/` |
+| `data/KITTI/process_data.py` | KITTI root, usually `<data-root>/KITTI` |
+| `data/VIGOR/process_data.py` | VIGOR root, usually `<data-root>/VIGOR` |
+
+## 🧭 Data Processing
+
+CROSS expects monocular depth maps before metadata generation. Save them as 16-bit PNG files, preferably in centimeters for numerical stability. The global scale can be arbitrary, but each depth file should match the corresponding image name with a `.png` suffix.
 
 ### KITTI
 
-Prepare the KITTI raw data and satellite maps under:
+Generate KITTI monocular depth maps with Depth-Anything-3 and store them under each raw drive:
 
 ```text
-$CROSS_DATA_ROOT/KITTI/
-  raw_data/
-  satmap/
+<data-root>/KITTI/raw_data/<date>/<drive>/mono_depth/
 ```
 
-Generate monocular depth for KITTI with Depth-Anything-3:
-
-```bash
-python data/da3_kitti.py \
-  --root-dir "$CROSS_DATA_ROOT/KITTI/raw_data" \
-  --model-id depth-anything/DA3NESTED-GIANT-LARGE-1.1 \
-  --batch-size 4
-```
-
-This writes `mono_depth/` PNG files inside each KITTI raw drive.
-
-Then build the KITTI metadata files:
+Then build KITTI metadata:
 
 ```bash
 cd data/KITTI
-python process_data.py --kitti_root "$CROSS_DATA_ROOT/KITTI"
-cd ../..
+python process_data.py
 ```
 
-This creates:
+This generates:
 
 ```text
-$CROSS_DATA_ROOT/KITTI/train_data.pth
-$CROSS_DATA_ROOT/KITTI/val_data.pth
-$CROSS_DATA_ROOT/KITTI/test_data.pth
+<data-root>/KITTI/train_data.pth
+<data-root>/KITTI/val_data.pth
+<data-root>/KITTI/test_data.pth
 ```
 
 ### VIGOR
 
-Prepare VIGOR under:
+Generate VIGOR monocular depth maps with DAP and store them under each city:
 
 ```text
-$CROSS_DATA_ROOT/VIGOR/
-  NewYork/
-  Seattle/
-  SanFrancisco/
-  Chicago/
-  splits__corrected/
+<data-root>/VIGOR/<city>/mono_depth/
 ```
 
-Copy the VIGOR depth inference script into the DAP repository and run it there:
-
-```bash
-cp data/infer_vigor_depth.py <DAP-repo>/test/
-cd <DAP-repo>
-python test/infer_vigor_depth.py \
-  --config config/infer.yaml \
-  --weights-dir <DAP-weights-dir> \
-  --vigor-root "$CROSS_DATA_ROOT/VIGOR" \
-  --gpu 0 \
-  --skip-existing
-```
-
-This writes `mono_depth/` PNG files inside each VIGOR city folder.
-
-Then build the VIGOR metadata files:
+Then build VIGOR metadata:
 
 ```bash
 cd data/VIGOR
-python process_data.py --vigor_root "$CROSS_DATA_ROOT/VIGOR"
-cd ../..
+python process_data.py
 ```
 
-This creates same-area and cross-area metadata:
+This generates metadata for both same-area and cross-area splits:
 
 ```text
-$CROSS_DATA_ROOT/VIGOR/same_area/train_data.pth
-$CROSS_DATA_ROOT/VIGOR/same_area/val_data.pth
-$CROSS_DATA_ROOT/VIGOR/same_area/test_data.pth
-$CROSS_DATA_ROOT/VIGOR/cross_area/train_data.pth
-$CROSS_DATA_ROOT/VIGOR/cross_area/val_data.pth
-$CROSS_DATA_ROOT/VIGOR/cross_area/test_data.pth
+<data-root>/VIGOR/same_area/train_data.pth
+<data-root>/VIGOR/same_area/val_data.pth
+<data-root>/VIGOR/same_area/test_data.pth
+<data-root>/VIGOR/cross_area/train_data.pth
+<data-root>/VIGOR/cross_area/val_data.pth
+<data-root>/VIGOR/cross_area/test_data.pth
 ```
 
-## Training
+## 🚀 Training
 
-Start training with the matching config:
+We recommend training on VIGOR first, then using the VIGOR checkpoint to initialize KITTI training.
+
+VIGOR same-area:
 
 ```bash
 python train.py --config configs/vigor_same_full_dinov2_config.yaml
-python train.py --config configs/vigor_cross_full_dinov2_config.yaml
-python train.py --config configs/kitti_full_dinov2_config.yaml
-```
-
-Weak-supervision and reduced-DoF configs are also provided:
-
-```bash
 python train.py --config configs/vigor_same_2dof_weak_dinov2_config.yaml
 python train.py --config configs/vigor_same_3dof_weak_dinov2_config.yaml
+```
+
+VIGOR cross-area:
+
+```bash
+python train.py --config configs/vigor_cross_full_dinov2_config.yaml
 python train.py --config configs/vigor_cross_2dof_weak_dinov2_config.yaml
 python train.py --config configs/vigor_cross_3dof_weak_dinov2_config.yaml
+```
+
+KITTI:
+
+```bash
+python train.py --config configs/kitti_full_dinov2_config.yaml
 python train.py --config configs/kitti_2dof_weak_dinov2_config.yaml
 python train.py --config configs/kitti_3dof_weak_dinov2_config.yaml
 ```
 
-Checkpoints and logs are saved under `checkpoints/<exp_name>/`.
+Checkpoints and logs are written to:
 
-## Path Configuration
+```text
+checkpoints/<exp_name>/
+```
 
-The repository does not require editing hard-coded machine paths. Configure local paths with environment variables or config values:
+## 📊 Testing
 
-- `CROSS_DATA_ROOT`: directory containing `KITTI/` and `VIGOR/`
-- `DINOV2_REPO`: local DINOv2 repository
-- `DINOV2_VITL14_WEIGHTS`: DINOv2 ViT-L/14 pretrained weights
-- `DINOV3_REPO`: local DINOv3 repository
-- `DINOV3_VITL16_WEIGHTS`: DINOv3 ViT-L/16 pretrained weights
+The test result printed at the end of training may not be the best result. Use `test.py` for final evaluation:
 
-If you use DINOv3 configs, set `model.dino_model_name` accordingly and make sure the DINOv3 paths above are exported.
+```bash
+python test.py \
+  --config configs/<config-name>.yaml \
+  --max_test_init_yaw_deg <orientation-noise-deg>
+```
+
+For example:
+
+```bash
+python test.py \
+  --config configs/vigor_same_full_dinov2_config.yaml \
+  --max_test_init_yaw_deg 180
+```
