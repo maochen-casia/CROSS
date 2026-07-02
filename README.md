@@ -1,11 +1,11 @@
-# More Than Where You Are: Learning Semantics, Structure, and Geometry from Cross-View Consistency
+# More Than Where You Are: Learning Semantics, Structure, and Geometry from Cross-View Localization
 
 <p align="center">
   <img src="figures/CROSS.png" alt="CROSS overview" width="90%">
 </p>
 
 <p align="center">
-  <strong>CROSS</strong> learns stable semantics, reliable structure, and transferable geometry from cross-view consistency.
+  <strong>CROSS</strong> learns stable semantics, reliable structure, and transferable geometry from cross-view localization.
 </p>
 
 ## ✨ Overview
