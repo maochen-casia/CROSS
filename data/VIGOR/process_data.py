@@ -145,7 +145,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
     
-    vigor_root = 'your/local/path/to/VIGOR'
+    vigor_root = '/your/path/to/VIGOR'
 
     random.seed(args.seed)
 

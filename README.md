@@ -175,3 +175,18 @@ python test.py \
   --config configs/vigor_same_full_dinov2_config.yaml \
   --max_test_init_yaw_deg 180
 ```
+
+## 📝 Citation
+
+If you find this work useful, please cite:
+
+```bibtex
+@article{chen2026more,
+  title={More Than Where You Are: Learning Semantics, Structure, and Geometry from Cross-View Localization},
+  author={Chen, Mao and Zhang, Xiangkai and Liu, Zhiyong and Liu, Chuankai and Yang, Xu},
+  journal={arXiv preprint arXiv:2607.12429},
+  year={2026},
+  doi={10.48550/arXiv.2607.12429},
+  url={https://arxiv.org/abs/2607.12429}
+}
+```

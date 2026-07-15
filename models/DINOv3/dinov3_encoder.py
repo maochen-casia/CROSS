@@ -1,10 +1,10 @@
 import os, sys
 
 code_dir = os.path.dirname(os.path.realpath(__file__))
-REPO_DIR = '/home/cm/dinov3'
+REPO_DIR = '/your/path/to/dinov3/repo'
 
 weight_paths = {
-    'dinov3_vitl16': '/mnt/sda/cm_data/dinov3/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth',
+    'dinov3_vitl16': '/your/path/to/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth',
 }
 
 import torch

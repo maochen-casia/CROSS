@@ -240,7 +240,7 @@ def main() -> None:
     parser.add_argument("--test_split", type=str, default="test2_files.txt")
     args = parser.parse_args()
 
-    kitti_root = 'your/local/path/to/KITTI'
+    kitti_root = '/your/path/to/KITTI'
     output_dir = Path(kitti_root)
     output_dir.mkdir(parents=True, exist_ok=True)
 

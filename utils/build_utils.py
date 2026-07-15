@@ -49,7 +49,7 @@ def build_data_loaders(config, seed):
     max_test_init_offset = data_cfg.max_test_init_offset
     max_test_init_yaw_deg = data_cfg.max_test_init_yaw_deg
 
-    data_root = '/mnt/sda/cm_data/'
+    data_root = '/your/path/to/data/root/'
 
     data_dict = read_data(data_dir=data_root,
                           dataset_name=dataset_name, keys=data_cfg.data_keys, split_type=split_type)
